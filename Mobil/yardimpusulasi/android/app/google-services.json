@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "105286709079",
+    "project_id": "yardimpusulasi-7f78f",
+    "storage_bucket": "yardimpusulasi-7f78f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105286709079:android:a48c7458ca43bc255c9812",
+        "android_client_info": {
+          "package_name": "com.yp.yardimpusulasi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7sekgLgRag3XYTls1aXwD72s_moUD0yA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
