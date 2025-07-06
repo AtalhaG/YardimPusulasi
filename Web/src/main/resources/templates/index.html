@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ana Sayfa</title>
+</head>
+<body>
+<h2>Şehir ve İlçe Seçimi</h2>
+
+<form method="post" action="/secim">
+    <label for="sehir">Bölge Seç:</label>
+    <select name="sehir" id="sehir" onchange="bolgeDegisti()">
+        <option th:each="bolge : ${bolgeler}" th:value="${bolge}" th:text="${bolge}"></option>
+    </select>
+
+    <br><br>
+
+    <label for="ilce">İlçe Seç:</label>
+    <select name="ilce" id="ilce">
+        <option value="">Önce bölge seçiniz</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Gönder</button>
+</form>
+
+<br><br>
+
+<p th:if="${sehir != null}">
+    Seçilen Şehir: <span th:text="${sehir}"></span>
+</p>
+<p th:if="${ilce != null}">
+    Seçilen İlçe: <span th:text="${ilce}"></span>
+</p>
+
+<script>
+function bolgeDegisti() {
+    var bolge = document.getElementById('sehir').value;
+    var ilceSelect = document.getElementById('ilce');
+    ilceSelect.innerHTML = '<option>Yükleniyor...</option>';
+    fetch('/ilceler?bolge=' + encodeURIComponent(bolge))
+        .then(response => response.json())
+        .then(data => {
+            ilceSelect.innerHTML = '';
+            data.forEach(function(ilce) {
+                var opt = document.createElement('option');
+                opt.value = ilce;
+                opt.innerHTML = ilce;
+                ilceSelect.appendChild(opt);
+            });
+        });
+}
+</script>
+
+</body>
+</html>
