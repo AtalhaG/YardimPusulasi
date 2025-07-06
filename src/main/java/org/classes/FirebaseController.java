@@ -1,4 +1,4 @@
-package org.example;
+package org.classes;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
