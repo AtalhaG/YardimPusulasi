@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'kisi_detay_page.dart';
 
 class SiralamaPage extends StatefulWidget {
   const SiralamaPage({Key? key}) : super(key: key);
@@ -578,9 +579,10 @@ class _SiralamaPageState extends State<SiralamaPage> {
                       ),
                       child: Card(
                         color: Colors.white,
-                        elevation: 3,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
+                          side: BorderSide.none,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
@@ -644,17 +646,11 @@ class _SiralamaPageState extends State<SiralamaPage> {
                               const SizedBox(height: 4),
                               // Satırlar
                               Expanded(
-                                child: ListView.separated(
+                                child: ListView.builder(
                                   itemCount: _filteredData.length,
-                                  separatorBuilder: (context, i) =>
-                                      const Divider(
-                                        height: 1,
-                                        color: Color(0xFFF0F0F0),
-                                      ),
                                   itemBuilder: (context, i) {
                                     final item = _filteredData[i];
-                                    return Container(
-                                      color: Colors.white,
+                                    return Padding(
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 16,
                                         horizontal: 8,
@@ -663,11 +659,35 @@ class _SiralamaPageState extends State<SiralamaPage> {
                                         children: [
                                           Expanded(
                                             flex: 3,
-                                            child: Text(
-                                              item['isim'],
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 15,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                // Kişi detay sayfasına git
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => KisiDetayPage(
+                                                      kisi: {
+                                                        'isim': item['isim'],
+                                                        'tc': '55667788990',
+                                                        'sehir': item['sehir'],
+                                                        'ilce': item['ilce'],
+                                                        'aile_buyuklugu': '5',
+                                                        'telefon': '0535 321 09 87',
+                                                        'yas': '45',
+                                                        'miktar': item['miktar'],
+                                                        'tarih': item['tarih'],
+                                                        'ihtiyac': 'Çocukların okul malzemeleri ve kıyafet yardımı',
+                                                      },
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                item['isim'],
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontSize: 15,
+                                                ),
                                               ),
                                             ),
                                           ),
