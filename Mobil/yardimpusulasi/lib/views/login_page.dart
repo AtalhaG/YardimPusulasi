@@ -58,15 +58,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF181017),
+      backgroundColor: Colors.white, // Arka plan beyaz
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF3B2638),
-                borderRadius: BorderRadius.all(Radius.circular(40)),
+              decoration: BoxDecoration(
+                color: Colors.white, // Kutu arka planı beyaz
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.fromLTRB(24, 36, 24, 32),
               child: Column(
@@ -76,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                   const Text(
                     'Yardım Pusulası',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1976D2), // Mavi başlık
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
@@ -86,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                   const Text(
                     'Daha fazla hayata dokunmak için doğru adresiniz burası.',
                     style: TextStyle(
-                      color: Color(0xFFD6CFE1),
+                      color: Color(0xFF757575), // Açık gri/kırık beyaz açıklama
                       fontSize: 15,
                     ),
                     textAlign: TextAlign.center,
@@ -94,53 +101,54 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 28),
                   TextField(
                     controller: _emailController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFF212121)), // Koyu yazı
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF4B3A4E),
+                      fillColor: Colors.white, // İç beyaz
                       hintText: 'Email',
-                      hintStyle: const TextStyle(color: Color(0xFFB9AFC9)),
+                      hintStyle: const TextStyle(color: Color(0xFFBDBDBD)), // Açık gri ipucu
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFB9AFC9)),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)), // Mavi çerçeve
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFB9AFC9)),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFB9AFC9), width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => setState(() {}), // Buton aktifliği için
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _passwordController,
                     obscureText: _isObscure,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFF212121)),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF4B3A4E),
+                      fillColor: Colors.white,
                       hintText: 'Şifre',
-                      hintStyle: const TextStyle(color: Color(0xFFB9AFC9)),
+                      hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFB9AFC9)),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFB9AFC9)),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFB9AFC9), width: 2),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isObscure ? Icons.visibility_off : Icons.visibility,
-                          color: const Color(0xFFB9AFC9),
+                          color: const Color(0xFF1976D2),
                         ),
                         onPressed: () {
                           setState(() {
@@ -149,6 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                     ),
+                    onChanged: (_) => setState(() {}), // Buton aktifliği için
                   ),
                   const SizedBox(height: 24),
                   if (_errorMessage != null) ...[
@@ -173,13 +182,14 @@ class _LoginPageState extends State<LoginPage> {
                         elevation: 0,
                         backgroundColor: Colors.transparent,
                         foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
                       ),
                       child: Ink(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
-                              Color(0xFF8F3FFF),
-                              Color(0xFFE85D5D),
+                              Color(0xFF1976D2), // Mavi
+                              Color(0xFF64B5F6), // Açık mavi
                             ],
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -200,6 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
+                                    color: Colors.white,
                                   ),
                                 ),
                         ),
@@ -212,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       const Text(
                         'Hesap Oluşturmak için ',
-                        style: TextStyle(color: Color(0xFFD6CFE1)),
+                        style: TextStyle(color: Color(0xFF757575)),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -221,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text(
                           'iletişime geç',
                           style: TextStyle(
-                            color: Color(0xFF1DE9B6),
+                            color: Color(0xFF1976D2),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
