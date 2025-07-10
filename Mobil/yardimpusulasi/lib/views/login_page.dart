@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Arka plan beyaz
+      backgroundColor: const Color.fromARGB(255, 213, 222, 245),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -101,15 +101,21 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 28),
                   TextField(
                     controller: _emailController,
-                    style: const TextStyle(color: Color(0xFF212121)), // Koyu yazı
+                    style: const TextStyle(
+                      color: Color(0xFF212121),
+                    ), // Koyu yazı
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white, // İç beyaz
                       hintText: 'Email',
-                      hintStyle: const TextStyle(color: Color(0xFFBDBDBD)), // Açık gri ipucu
+                      hintStyle: const TextStyle(
+                        color: Color(0xFFBDBDBD),
+                      ), // Açık gri ipucu
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF1976D2)), // Mavi çerçeve
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                        ), // Mavi çerçeve
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -117,7 +123,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -143,7 +152,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -171,7 +183,10 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty && !_isLoading)
+                      onPressed:
+                          (_emailController.text.isNotEmpty &&
+                              _passwordController.text.isNotEmpty &&
+                              !_isLoading)
                           ? _signIn
                           : null,
                       style: ElevatedButton.styleFrom(
