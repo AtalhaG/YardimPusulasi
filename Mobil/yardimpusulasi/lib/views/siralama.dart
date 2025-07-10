@@ -1,731 +1,264 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'siralama.dart';
 
-class SiralamaPage extends StatefulWidget {
-  const SiralamaPage({Key? key}) : super(key: key);
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
-  State<SiralamaPage> createState() => _SiralamaPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _SiralamaPageState extends State<SiralamaPage> {
-  final Map<String, List<String>> _ilceler = {
-    'İstanbul': ['beylikduzu', 'Beşiktaş', 'Üsküdar'],
-    'Ankara': ['sincan', 'Keçiören', 'Yenimahalle'],
-    'İzmir': ['Konak', 'Bornova', 'Karşıyaka'],
-  };
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isObscure = true;
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  String? _selectedSehir;
-  String? _selectedIlce;
-
-  String _search = '';
-  String _sort = 'Gelir/Kişi';
-  String _sortDirection = 'desc'; // 'asc' veya 'desc'
-
-  bool _showList = false;
-  bool _searchStarted = false;
-
-  String normalize(String input) {
-    return input
-        .toLowerCase()
-        .replaceAll('ı', 'i')
-        .replaceAll('ğ', 'g')
-        .replaceAll('ü', 'u')
-        .replaceAll('ş', 's')
-        .replaceAll('ö', 'o')
-        .replaceAll('ç', 'c')
-        .replaceAll('İ', 'i');
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  Future<List<Map<String, dynamic>>> getVatandaslar(
-    String sehir,
-    String ilce,
-  ) async {
-    final sehirLower = normalize(sehir);
-    final ilceLower = normalize(ilce);
-    debugPrint('Firestore sorgusu: bolgeler/$sehirLower/$ilceLower');
-    final snapshot = await FirebaseFirestore.instance
-        .collection('bolgeler')
-        .doc(sehirLower)
-        .collection(ilceLower)
-        .get();
-    debugPrint('Firestore dönen kişi sayısı: ${snapshot.docs.length}');
-    return snapshot.docs.map((doc) => doc.data()).toList();
+  Future<void> _signIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      // Başarılı girişte yönlendirme
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SiralamaPage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
-        elevation: 2,
-        automaticallyImplyLeading: false,
-        titleSpacing: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12, right: 8),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(Icons.favorite, color: Colors.white, size: 24),
-            ),
-          ),
-        ),
-        title: _searchStarted
-            ? SizedBox(
-                height: 40,
-                child: TextField(
-                  readOnly: false,
-                  decoration: InputDecoration(
-                    hintText: 'Ara',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Colors.blue,
-                        width: 2,
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 12,
-                    ),
+      backgroundColor: const Color.fromARGB(255, 213, 222, 245),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white, // Kutu arka planı beyaz
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
-                  onChanged: (val) => setState(() {
-                    _search = val;
-                  }),
-                ),
-              )
-            : null,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.red),
-            tooltip: 'Çıkış',
-            onPressed: () {
-              // Çıkış işlemi burada yapılabilir
-            },
-          ),
-        ],
-      ),
-      body: !_searchStarted
-          ? Center(
-              child: Card(
-                color: Colors.white,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 32,
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 36, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Yardım Pusulası',
+                    style: TextStyle(
+                      color: Color(0xFF1976D2), // Mavi başlık
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.location_on, color: Colors.blue),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Konum Filtresi',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.blue[900],
-                            ),
-                          ),
-                        ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Daha fazla hayata dokunmak için doğru adresiniz burası.',
+                    style: TextStyle(
+                      color: Color(0xFF757575), // Açık gri/kırık beyaz açıklama
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+                  TextField(
+                    controller: _emailController,
+                    style: const TextStyle(
+                      color: Color(0xFF212121),
+                    ), // Koyu yazı
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white, // İç beyaz
+                      hintText: 'Email',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFFBDBDBD),
+                      ), // Açık gri ipucu
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                        ), // Mavi çerçeve
                       ),
-                      const SizedBox(height: 24),
-                      Card(
-                        color: Colors.white,
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 20,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // İl/ilçe seçim kartında seçimler ve buton
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        width: 140,
-                                        child: DropdownButtonFormField<String>(
-                                          value: _selectedSehir,
-                                          decoration: InputDecoration(
-                                            labelText: 'İl',
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                  vertical: 8,
-                                                ),
-                                          ),
-                                          items: _ilceler.keys
-                                              .map(
-                                                (sehir) => DropdownMenuItem(
-                                                  value: sehir,
-                                                  child: Text(sehir),
-                                                ),
-                                              )
-                                              .toList(),
-                                          onChanged: (val) {
-                                            setState(() {
-                                              _selectedSehir = val;
-                                              _selectedIlce = null;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      SizedBox(
-                                        width: 140,
-                                        child: DropdownButtonFormField<String>(
-                                          value: _selectedIlce,
-                                          decoration: InputDecoration(
-                                            labelText: 'İlçe',
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                  vertical: 8,
-                                                ),
-                                          ),
-                                          items:
-                                              (_selectedSehir != null
-                                                      ? _ilceler[_selectedSehir] ??
-                                                            []
-                                                      : <String>[])
-                                                  .map(
-                                                    (ilce) => DropdownMenuItem(
-                                                      value: ilce,
-                                                      child: Text(ilce),
-                                                    ),
-                                                  )
-                                                  .toList(),
-                                          onChanged: (val) {
-                                            setState(() {
-                                              _selectedIlce = val;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: SizedBox(
-                                      width: 180,
-                                      child: ElevatedButton.icon(
-                                        icon: const Icon(Icons.search),
-                                        label: const Text('Ara'),
-                                        style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 14,
-                                          ),
-                                          textStyle: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        onPressed:
-                                            (_selectedSehir != null &&
-                                                _selectedIlce != null)
-                                            ? () => setState(() {
-                                                _searchStarted = true;
-                                                _showList = true;
-                                              })
-                                            : null,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => setState(() {}), // Buton aktifliği için
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _isObscure,
+                    style: const TextStyle(color: Color(0xFF212121)),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Şifre',
+                      hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isObscure ? Icons.visibility_off : Icons.visibility,
+                          color: const Color(0xFF1976D2),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isObscure = !_isObscure;
+                          });
+                        },
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}), // Buton aktifliği için
+                  ),
+                  const SizedBox(height: 24),
+                  if (_errorMessage != null) ...[
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed:
+                          (_emailController.text.isNotEmpty &&
+                              _passwordController.text.isNotEmpty &&
+                              !_isLoading)
+                          ? _signIn
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
+                      ),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFF1976D2), // Mavi
+                              Color(0xFF64B5F6), // Açık mavi
                             ],
                           ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Text(
+                                  'Giriş Yap',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
-                      const SizedBox(height: 32),
-                      Column(
-                        children: [
-                          Icon(
-                            Icons.add_circle_outline,
-                            color: Colors.blue[200],
-                            size: 48,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Hesap Oluşturmak için ',
+                        style: TextStyle(color: Color(0xFF757575)),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          // iletişime geç aksiyonu
+                        },
+                        child: const Text(
+                          'iletişime geç',
+                          style: TextStyle(
+                            color: Color(0xFF1976D2),
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Başlamak için konum seçin',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Önce il ve ilçe seçimi yaparak yardım almış kişileri görüntüleyin',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 20,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedSehir,
-                              decoration: InputDecoration(
-                                labelText: 'Şehir',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                              items: _ilceler.keys
-                                  .map(
-                                    (sehir) => DropdownMenuItem(
-                                      value: sehir,
-                                      child: Text(sehir),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedSehir = val;
-                                  _selectedIlce = null;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedIlce,
-                              decoration: InputDecoration(
-                                labelText: 'İlçe',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                              items:
-                                  (_selectedSehir != null
-                                          ? _ilceler[_selectedSehir] ?? []
-                                          : <String>[])
-                                      .map(
-                                        (ilce) => DropdownMenuItem(
-                                          value: ilce,
-                                          child: Text(ilce),
-                                        ),
-                                      )
-                                      .toList(),
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedIlce = val;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.search),
-                            label: const Text('Ara'),
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                                horizontal: 18,
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onPressed:
-                                (_selectedSehir != null &&
-                                    _selectedIlce != null)
-                                ? () => setState(() {
-                                    _showList = true;
-                                  })
-                                : null,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (!_showList)
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Colors.blue[200],
-                            size: 48,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'İl ve ilçe seçin',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Tabloyu görmek için il ve ilçe seçimi yapın ve Ara butonuna basın',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                if (_showList &&
-                    _selectedSehir != null &&
-                    _selectedIlce != null)
-                  FutureBuilder<List<Map<String, dynamic>>>(
-                    future: getVatandaslar(_selectedSehir!, _selectedIlce!),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Expanded(
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      if (snapshot.hasError) {
-                        return Expanded(
-                          child: Center(child: Text('Hata: ${snapshot.error}')),
-                        );
-                      }
-                      final vatandaslar = snapshot.data ?? [];
-                      if (vatandaslar.isEmpty) {
-                        return const Expanded(
-                          child: Center(child: Text('Kayıt bulunamadı.')),
-                        );
-                      }
-
-                      return Expanded(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 20,
-                              ),
-                              child: Card(
-                                color: Colors.white,
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Yardım Yapılan Kişi Sayısı',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                          color: Color(0xFF111827),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        'Seçili şehir ve ilçedeki toplam yardım yapılan kişi sayısının özeti.',
-                                        style: TextStyle(
-                                          color: Color(0xFF6B7280),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          const Icon(
-                                            Icons.group,
-                                            color: Color(0xFFFF2D55),
-                                            size: 36,
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            '${vatandaslar.length}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 32,
-                                              color: Color(0xFF111827),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 0,
-                                ),
-                                child: Card(
-                                  color: Colors.white,
-                                  elevation: 3,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20.0),
-                                    child: Column(
-                                      children: [
-                                        // Modern başlık satırı
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFE3F2FD),
-                                            borderRadius: BorderRadius.circular(
-                                              14,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 14,
-                                            horizontal: 12,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                  'İsim',
-                                                  style: TextStyle(
-                                                    color: _sort == 'Alfabe'
-                                                        ? Colors.blue
-                                                        : Colors.black,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                  'En Son Yardım Tarihi',
-                                                  style: TextStyle(
-                                                    color: _sort == 'Tarih'
-                                                        ? Colors.blue
-                                                        : Colors.black,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 10,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Text(
-                                                  'Son Yardım Miktarı',
-                                                  style: TextStyle(
-                                                    color: _sort == 'Gelir/Kişi'
-                                                        ? Colors.blue
-                                                        : Colors.black,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 10,
-                                                  ),
-                                                  textAlign: TextAlign.right,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        // Satırlar
-                                        Expanded(
-                                          child: ListView.separated(
-                                            itemCount: vatandaslar.length,
-                                            separatorBuilder: (context, i) =>
-                                                const Divider(
-                                                  height: 1,
-                                                  color: Color(0xFFF0F0F0),
-                                                ),
-                                            itemBuilder: (context, i) {
-                                              final item = vatandaslar[i];
-                                              // Convert Firestore Timestamp to DateTime if needed
-                                              final tarih =
-                                                  item['sontarih'] is Timestamp
-                                                  ? (item['sontarih']
-                                                            as Timestamp)
-                                                        .toDate()
-                                                  : DateTime.now();
-
-                                              return Container(
-                                                color: Colors.white,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 16,
-                                                      horizontal: 8,
-                                                    ),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      flex: 3,
-                                                      child: Text(
-                                                        item['isim'] ??
-                                                            'İsim Yok',
-                                                        style: const TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 15,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      flex: 3,
-                                                      child: Text(
-                                                        '${tarih.day.toString().padLeft(2, '0')}.${tarih.month.toString().padLeft(2, '0')}.${tarih.year}',
-                                                        style: const TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 15,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      flex: 2,
-                                                      child: Text(
-                                                        '${item['sonaciklama'] ?? '0'}',
-                                                        style: const TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 15,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.right,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-              ],
             ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.list, size: 32),
-                color: Colors.blue,
-                onPressed: () {
-                  // Liste görünümü aksiyonu
-                },
-              ),
-              const SizedBox(width: 32),
-              IconButton(
-                icon: const Icon(Icons.history, size: 32),
-                color: Colors.blue,
-                onPressed: () {
-                  // Geçmiş aksiyonu
-                },
-              ),
-            ],
           ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: () {
-          // + butonu aksiyonu
-        },
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
-        elevation: 4,
       ),
     );
   }
