@@ -1,68 +1,32 @@
 import 'package:flutter/material.dart';
+
 import 'yeni_kisi_ekle.dart';
 import '../kisisel_data.dart';
 
-class SiralamaPage extends StatefulWidget {
-  const SiralamaPage({Key? key}) : super(key: key);
+import 'package:firebase_auth/firebase_auth.dart';
+import 'siralama.dart';
+
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
-  State<SiralamaPage> createState() => _SiralamaPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _SiralamaPageState extends State<SiralamaPage> {
-  final List<Map<String, dynamic>> _data = [
-    {
-      'isim': 'Ahmet Yılmaz',
-      'tarih': DateTime(2024, 6, 1),
-      'miktar': 1200,
-      'sehir': 'İstanbul',
-      'ilce': 'Kadıköy',
-    },
-    {
-      'isim': 'Zeynep Kaya',
-      'tarih': DateTime(2024, 5, 20),
-      'miktar': 800,
-      'sehir': 'İstanbul',
-      'ilce': 'Kadıköy',
-    },
-    {
-      'isim': 'Mehmet Demir',
-      'tarih': DateTime(2024, 6, 3),
-      'miktar': 500,
-      'sehir': 'Ankara',
-      'ilce': 'Çankaya',
-    },
-    {
-      'isim': 'Elif Çelik',
-      'tarih': DateTime(2024, 4, 15),
-      'miktar': 2000,
-      'sehir': 'Ankara',
-      'ilce': 'Keçiören',
-    },
-    {
-      'isim': 'Burak Aksoy',
-      'tarih': DateTime(2024, 6, 2),
-      'miktar': 1500,
-      'sehir': 'İzmir',
-      'ilce': 'Konak',
-    },
-  ];
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isObscure = true;
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  final Map<String, List<String>> _ilceler = {
-    'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar'],
-    'Ankara': ['Çankaya', 'Keçiören', 'Yenimahalle'],
-    'İzmir': ['Konak', 'Bornova', 'Karşıyaka'],
-  };
-
-  String? _selectedSehir;
-  String? _selectedIlce;
-
-  String _search = '';
-  String _sort = 'Gelir/Kişi';
-  String _sortDirection = 'desc'; // 'asc' veya 'desc'
-
-  bool _showList = false;
-  bool _searchStarted = false;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   // KisiselData'daki kişileri düz bir listeye çevirip _data ile birleştir
   List<Map<String, dynamic>> get _allKisiler {
@@ -112,9 +76,38 @@ class _SiralamaPageState extends State<SiralamaPage> {
         (a, b) => _sortDirection == 'asc'
             ? (a['isim'] ?? '').compareTo(b['isim'] ?? '')
             : (b['isim'] ?? '').compareTo(a['isim'] ?? ''),
+=======
+  Future<void> _signIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+
       );
+      // Başarılı girişte yönlendirme
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SiralamaPage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-    return filtered;
   }
 
   // Seçili ilçedeki eklenen kişileri getir
@@ -131,101 +124,66 @@ class _SiralamaPageState extends State<SiralamaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
-        elevation: 2,
-        automaticallyImplyLeading: false,
-        titleSpacing: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12, right: 8),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(Icons.favorite, color: Colors.white, size: 24),
-            ),
-          ),
-        ),
-        title: _searchStarted
-            ? SizedBox(
-                height: 40,
-                child: TextField(
-                  readOnly: false,
-                  decoration: InputDecoration(
-                    hintText: 'Ara',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Colors.blue,
-                        width: 2,
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 12,
-                    ),
+      backgroundColor: const Color.fromARGB(255, 213, 222, 245),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white, // Kutu arka planı beyaz
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
-                  onChanged: (val) => setState(() {
-                    _search = val;
-                  }),
-                ),
-              )
-            : null,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.red),
-            tooltip: 'Çıkış',
-            onPressed: () {
-              // Çıkış işlemi burada yapılabilir
-            },
-          ),
-        ],
-      ),
-      body: !_searchStarted
-          ? Center(
-              child: Card(
-                color: Colors.white,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 32,
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 36, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Yardım Pusulası',
+                    style: TextStyle(
+                      color: Color(0xFF1976D2), // Mavi başlık
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.location_on, color: Colors.blue),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Konum Filtresi',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.blue[900],
-                            ),
-                          ),
-                        ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Daha fazla hayata dokunmak için doğru adresiniz burası.',
+                    style: TextStyle(
+                      color: Color(0xFF757575), // Açık gri/kırık beyaz açıklama
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+                  TextField(
+                    controller: _emailController,
+                    style: const TextStyle(
+                      color: Color(0xFF212121),
+                    ), // Koyu yazı
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white, // İç beyaz
+                      hintText: 'Email',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFFBDBDBD),
+                      ), // Açık gri ipucu
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                        ), // Mavi çerçeve
                       ),
+
                       const SizedBox(height: 24),
                       Card(
                         color: Colors.white,
@@ -356,31 +314,20 @@ class _SiralamaPageState extends State<SiralamaPage> {
                             ],
                           ),
                         ),
+
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+
                       ),
-                      const SizedBox(height: 32),
-                      Column(
-                        children: [
-                          Icon(
-                            Icons.add_circle_outline,
-                            color: Colors.blue[200],
-                            size: 48,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Başlamak için konum seçin',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Önce il ve ilçe seçimi yaparak yardım almış kişileri görüntüleyin',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
                       ),
+
                     ],
                   ),
                 ),
@@ -408,13 +355,80 @@ class _SiralamaPageState extends State<SiralamaPage> {
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
+=======
                     ),
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => setState(() {}), // Buton aktifliği için
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _isObscure,
+                    style: const TextStyle(color: Color(0xFF212121)),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Şifre',
+                      hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1976D2),
+                          width: 2,
+                        ),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isObscure ? Icons.visibility_off : Icons.visibility,
+                          color: const Color(0xFF1976D2),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isObscure = !_isObscure;
+                          });
+                        },
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}), // Buton aktifliği için
+                  ),
+                  const SizedBox(height: 24),
+                  if (_errorMessage != null) ...[
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                      textAlign: TextAlign.center,
+
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed:
+                          (_emailController.text.isNotEmpty &&
+                              _passwordController.text.isNotEmpty &&
+                              !_isLoading)
+                          ? _signIn
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
+                      ),
+
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Column(
@@ -536,10 +550,64 @@ class _SiralamaPageState extends State<SiralamaPage> {
                               ),
                             ),
                           ],
+
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFF1976D2), // Mavi
+                              Color(0xFF64B5F6), // Açık mavi
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Text(
+                                  'Giriş Yap',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Hesap Oluşturmak için ',
+                        style: TextStyle(color: Color(0xFF757575)),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          // iletişime geç aksiyonu
+                        },
+                        child: const Text(
+                          'iletişime geç',
+                          style: TextStyle(
+                            color: Color(0xFF1976D2),
+                            fontWeight: FontWeight.bold,
+                          ),
+
+                        ),
+                      ),
+                    ],
+                  ),
+
                 ),
               ],
             ),
@@ -567,11 +635,15 @@ class _SiralamaPageState extends State<SiralamaPage> {
                 onPressed: () {
                   // Geçmiş aksiyonu
                 },
+
+                ],
+
               ),
-            ],
+            ),
           ),
         ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
@@ -583,6 +655,7 @@ class _SiralamaPageState extends State<SiralamaPage> {
         child: const Icon(Icons.add, color: Colors.white, size: 32),
         elevation: 4,
       ),
+
     );
   }
 }
