@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../kisisel_data.dart';
 
 class YeniKisiEklePage extends StatefulWidget {
   const YeniKisiEklePage({Key? key}) : super(key: key);
@@ -24,12 +23,12 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
   final TextEditingController _ihtiyacController = TextEditingController();
 
   // Statik iller ve ilçeler
-  final Map<String, List<String>> _illerVeIlceler = {
-    'İstanbul': ['Beylikdüzü', 'Beşiktaş', 'Üsküdar'],
-    'Ankara': ['Çankaya', 'Keçiören', 'Yenimahalle'],
+  final Map<String, List<String>> _ilceler = {
+    'İstanbul': ['beylikduzu', 'Beşiktaş', 'Üsküdar'],
+    'Ankara': ['sincan', 'Keçiören', 'Yenimahalle'],
     'İzmir': ['Konak', 'Bornova', 'Karşıyaka'],
   };
-  String? _selectedIl;
+  String? _selectedSehir;
   String? _selectedIlce;
 
   // Eklenen kişiler ilçeye göre gruplanacak
@@ -49,6 +48,18 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
     super.dispose();
   }
 
+  String normalize(String input) {
+    return input
+        .toLowerCase()
+        .replaceAll('ı', 'i')
+        .replaceAll('ğ', 'g')
+        .replaceAll('ü', 'u')
+        .replaceAll('ş', 's')
+        .replaceAll('ö', 'o')
+        .replaceAll('ç', 'c')
+        .replaceAll('İ', 'i');
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 700;
@@ -61,7 +72,11 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
         title: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black54, size: 20),
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.black54,
+                size: 20,
+              ),
               onPressed: () => Navigator.of(context).maybePop(),
               tooltip: 'Geri Dön',
             ),
@@ -91,9 +106,14 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
             child: Card(
               color: Colors.white,
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32),
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 28,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -113,42 +133,102 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                       isWide
                           ? Row(
                               children: [
-                                Expanded(child: _buildTextField(_adController, "Ad")),
+                                Expanded(
+                                  child: _buildTextField(_adController, "Ad"),
+                                ),
                                 const SizedBox(width: 18),
-                                Expanded(child: _buildTextField(_soyadController, "Soyad")),
+                                Expanded(
+                                  child: _buildTextField(
+                                    _soyadController,
+                                    "Soyad",
+                                  ),
+                                ),
                               ],
                             )
                           : _buildTextField(_adController, "Ad"),
                       isWide
                           ? Row(
                               children: [
-                                Expanded(child: _buildTextField(_yasController, "Yaş", keyboardType: TextInputType.number)),
+                                Expanded(
+                                  child: _buildTextField(
+                                    _yasController,
+                                    "Yaş",
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
                                 const SizedBox(width: 18),
-                                Expanded(child: _buildTextField(_tcController, "TC Kimlik No", keyboardType: TextInputType.number)),
+                                Expanded(
+                                  child: _buildTextField(
+                                    _tcController,
+                                    "TC Kimlik No",
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
                               ],
                             )
                           : _buildTextField(_soyadController, "Soyad"),
                       isWide
                           ? Row(
                               children: [
-                                Expanded(child: _buildTextField(_telefonController, "Telefon", keyboardType: TextInputType.phone)),
+                                Expanded(
+                                  child: _buildTextField(
+                                    _telefonController,
+                                    "Telefon",
+                                    keyboardType: TextInputType.phone,
+                                  ),
+                                ),
                                 const SizedBox(width: 18),
-                                Expanded(child: _buildTextField(_aileController, "Aile Büyüklüğü", keyboardType: TextInputType.number)),
+                                Expanded(
+                                  child: _buildTextField(
+                                    _aileController,
+                                    "Aile Büyüklüğü",
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
                               ],
                             )
-                          : _buildTextField(_yasController, "Yaş", keyboardType: TextInputType.number),
+                          : _buildTextField(
+                              _yasController,
+                              "Yaş",
+                              keyboardType: TextInputType.number,
+                            ),
                       isWide
                           ? Row(
                               children: [
-                                Expanded(child: _buildTextField(_gelirController, "Aylık Gelir (TL)", keyboardType: TextInputType.number)),
+                                Expanded(
+                                  child: _buildTextField(
+                                    _gelirController,
+                                    "Aylık Gelir (TL)",
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
                                 const SizedBox(width: 18),
                                 Expanded(child: _buildDropdownIl()),
                               ],
                             )
-                          : _buildTextField(_tcController, "TC Kimlik No", keyboardType: TextInputType.number),
-                      if (!isWide) _buildTextField(_telefonController, "Telefon", keyboardType: TextInputType.phone),
-                      if (!isWide) _buildTextField(_aileController, "Aile Büyüklüğü", keyboardType: TextInputType.number),
-                      if (!isWide) _buildTextField(_gelirController, "Aylık Gelir (TL)", keyboardType: TextInputType.number),
+                          : _buildTextField(
+                              _tcController,
+                              "TC Kimlik No",
+                              keyboardType: TextInputType.number,
+                            ),
+                      if (!isWide)
+                        _buildTextField(
+                          _telefonController,
+                          "Telefon",
+                          keyboardType: TextInputType.phone,
+                        ),
+                      if (!isWide)
+                        _buildTextField(
+                          _aileController,
+                          "Aile Büyüklüğü",
+                          keyboardType: TextInputType.number,
+                        ),
+                      if (!isWide)
+                        _buildTextField(
+                          _gelirController,
+                          "Aylık Gelir (TL)",
+                          keyboardType: TextInputType.number,
+                        ),
                       if (!isWide) _buildDropdownIl(),
                       _buildDropdownIlce(),
                       _buildTextField(_adresController, "Adres", maxLines: 2),
@@ -160,15 +240,26 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                           decoration: InputDecoration(
                             labelText: "İhtiyaç Açıklaması",
                             alignLabelWithHint: true,
-                            labelStyle: const TextStyle(fontSize: 13, color: Color(0xFF757575)),
+                            labelStyle: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF757575),
+                            ),
                             filled: true,
                             fillColor: Colors.white,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF1976D2),
+                                width: 2,
+                              ),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 18,
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -189,7 +280,10 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.grey[700],
                               side: BorderSide(color: Colors.grey[400]!),
-                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 28),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 28,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -202,23 +296,40 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                             child: ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  setState(() {
-                                    if (!KisiselData.ilceyeGoreKisiler.containsKey(_selectedIlce)) {
-                                      KisiselData.ilceyeGoreKisiler[_selectedIlce!] = [];
-                                    }
-                                    KisiselData.ilceyeGoreKisiler[_selectedIlce!]!.add({
-                                      'isim': _adController.text,
-                                      'soyad': _soyadController.text,
-                                      'yas': _yasController.text,
-                                      'tc': _tcController.text,
-                                      'telefon': _telefonController.text,
-                                      'aile': _aileController.text,
-                                      'gelir': _gelirController.text,
-                                      'adres': _adresController.text,
-                                      'ihtiyac': _ihtiyacController.text,
-                                      'il': _selectedIl ?? '',
-                                      'ilce': _selectedIlce ?? '',
-                                    });
+                                  if (_selectedSehir == null ||
+                                      _selectedIlce == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'İl ve ilçe seçilmelidir! ',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  final sehirNorm = normalize(_selectedSehir!);
+                                  final ilceNorm = normalize(_selectedIlce!);
+                                  final kisiData = {
+                                    'isim': _adController.text,
+                                    'soyad': _soyadController.text,
+                                    'yas': _yasController.text,
+                                    'tc': _tcController.text,
+                                    'telefon': _telefonController.text,
+                                    'aile': _aileController.text,
+                                    'gelir': _gelirController.text,
+                                    'adres': _adresController.text,
+                                    'ihtiyac': _ihtiyacController.text,
+                                    'il': _selectedSehir ?? '',
+                                    'ilce': _selectedIlce ?? '',
+                                    'sontarih': FieldValue.serverTimestamp(),
+                                    'sonaciklama': _ihtiyacController.text,
+                                  };
+                                  try {
+                                    await FirebaseFirestore.instance
+                                        .collection('bolgeler')
+                                        .doc(sehirNorm)
+                                        .collection(ilceNorm)
+                                        .add(kisiData);
                                     _adController.clear();
                                     _soyadController.clear();
                                     _yasController.clear();
@@ -228,12 +339,22 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                                     _gelirController.clear();
                                     _adresController.clear();
                                     _ihtiyacController.clear();
-                                    _selectedIl = null;
-                                    _selectedIlce = null;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Kişi eklendi (sadece bellekte)!")),
-                                  );
+                                    setState(() {
+                                      _selectedSehir = null;
+                                      _selectedIlce = null;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Kişi başarıyla eklendi!',
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Hata: $e')),
+                                    );
+                                  }
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -262,9 +383,20 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: const [
-                                      Icon(Icons.save, size: 20, color: Colors.white),
+                                      Icon(
+                                        Icons.save,
+                                        size: 20,
+                                        color: Colors.white,
+                                      ),
                                       SizedBox(width: 8),
-                                      Text("Kaydet", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                                      Text(
+                                        "Kaydet",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -288,7 +420,7 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: _selectedIl,
+        value: _selectedSehir,
         decoration: InputDecoration(
           labelText: 'İl',
           alignLabelWithHint: true,
@@ -300,17 +432,17 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
-        items: _illerVeIlceler.keys
-            .map((il) => DropdownMenuItem(
-                  value: il,
-                  child: Text(il),
-                ))
+        items: _ilceler.keys
+            .map((il) => DropdownMenuItem(value: il, child: Text(il)))
             .toList(),
         onChanged: (value) {
           setState(() {
-            _selectedIl = value;
+            _selectedSehir = value;
             _selectedIlce = null;
           });
         },
@@ -340,13 +472,16 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
-        items: (_selectedIl != null ? _illerVeIlceler[_selectedIl] ?? [] : [])
-            .map<DropdownMenuItem<String>>((ilce) => DropdownMenuItem<String>(
-                  value: ilce,
-                  child: Text(ilce),
-                ))
+        items: (_selectedSehir != null ? _ilceler[_selectedSehir] ?? [] : [])
+            .map<DropdownMenuItem<String>>(
+              (ilce) =>
+                  DropdownMenuItem<String>(value: ilce, child: Text(ilce)),
+            )
             .toList(),
         onChanged: (value) {
           setState(() {
@@ -386,7 +521,10 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
