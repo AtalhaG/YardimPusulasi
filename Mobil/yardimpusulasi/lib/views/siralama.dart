@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'yeni_kisi_ekle.dart';
+import '../kisisel_data.dart';
 
 class SiralamaPage extends StatefulWidget {
   const SiralamaPage({Key? key}) : super(key: key);
@@ -62,10 +64,25 @@ class _SiralamaPageState extends State<SiralamaPage> {
   bool _showList = false;
   bool _searchStarted = false;
 
+  // KisiselData'daki kişileri düz bir listeye çevirip _data ile birleştir
+  List<Map<String, dynamic>> get _allKisiler {
+    final List<Map<String, dynamic>> yeniKisiler = [];
+    KisiselData.ilceyeGoreKisiler.forEach((ilce, kisiler) {
+      for (var kisi in kisiler) {
+        yeniKisiler.add({
+          ...kisi,
+          'ilce': ilce,
+          'sehir': kisi['il'] ?? '',
+        });
+      }
+    });
+    return [..._data, ...yeniKisiler];
+  }
+
   List<Map<String, dynamic>> get _filteredData {
-    List<Map<String, dynamic>> filtered = _data
+    List<Map<String, dynamic>> filtered = _allKisiler
         .where(
-          (item) => item['isim'].toLowerCase().contains(_search.toLowerCase()),
+          (item) => (item['isim'] ?? '').toLowerCase().contains(_search.toLowerCase()),
         )
         .toList();
     if (_selectedSehir != null) {
@@ -81,23 +98,34 @@ class _SiralamaPageState extends State<SiralamaPage> {
     if (_sort == 'Gelir/Kişi') {
       filtered.sort(
         (a, b) => _sortDirection == 'asc'
-            ? a['miktar'].compareTo(b['miktar'])
-            : b['miktar'].compareTo(a['miktar']),
+            ? (a['miktar'] ?? 0).compareTo(b['miktar'] ?? 0)
+            : (b['miktar'] ?? 0).compareTo(a['miktar'] ?? 0),
       );
     } else if (_sort == 'Tarih') {
       filtered.sort(
         (a, b) => _sortDirection == 'asc'
-            ? a['tarih'].compareTo(b['tarih'])
-            : b['tarih'].compareTo(a['tarih']),
+            ? (a['tarih'] ?? DateTime(2000)).compareTo(b['tarih'] ?? DateTime(2000))
+            : (b['tarih'] ?? DateTime(2000)).compareTo(a['tarih'] ?? DateTime(2000)),
       );
     } else if (_sort == 'Alfabe') {
       filtered.sort(
         (a, b) => _sortDirection == 'asc'
-            ? a['isim'].compareTo(b['isim'])
-            : b['isim'].compareTo(a['isim']),
+            ? (a['isim'] ?? '').compareTo(b['isim'] ?? '')
+            : (b['isim'] ?? '').compareTo(a['isim'] ?? ''),
       );
     }
     return filtered;
+  }
+
+  // Seçili ilçedeki eklenen kişileri getir
+  List<Map<String, dynamic>> get _filteredIlceKisileri {
+    final String? ilce = _selectedIlce;
+    if (ilce == null) return [];
+    return KisiselData.ilceyeGoreKisiler[ilce]?.map((kisi) => {
+      ...kisi,
+      'ilce': ilce,
+      'sehir': kisi['il'] ?? '',
+    }).toList() ?? [];
   }
 
   @override
@@ -315,11 +343,11 @@ class _SiralamaPageState extends State<SiralamaPage> {
                                         onPressed:
                                             (_selectedSehir != null &&
                                                 _selectedIlce != null)
-                                            ? () => setState(() {
-                                                _searchStarted = true;
-                                                _showList = true;
-                                              })
-                                            : null,
+                                                ? () => setState(() {
+                                                    _searchStarted = true;
+                                                    _showList = true;
+                                                  })
+                                                : null,
                                       ),
                                     ),
                                   ),
@@ -361,149 +389,25 @@ class _SiralamaPageState extends State<SiralamaPage> {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 20,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedSehir,
-                              decoration: InputDecoration(
-                                labelText: 'Şehir',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                              items: _ilceler.keys
-                                  .map(
-                                    (sehir) => DropdownMenuItem(
-                                      value: sehir,
-                                      child: Text(sehir),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedSehir = val;
-                                  _selectedIlce = null;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedIlce,
-                              decoration: InputDecoration(
-                                labelText: 'İlçe',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                              items:
-                                  (_selectedSehir != null
-                                          ? _ilceler[_selectedSehir] ?? []
-                                          : <String>[])
-                                      .map(
-                                        (ilce) => DropdownMenuItem(
-                                          value: ilce,
-                                          child: Text(ilce),
-                                        ),
-                                      )
-                                      .toList(),
-                              onChanged: (val) {
-                                setState(() {
-                                  _selectedIlce = val;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.search),
-                            label: const Text('Ara'),
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                                horizontal: 18,
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onPressed:
-                                (_selectedSehir != null &&
-                                    _selectedIlce != null)
-                                ? () => setState(() {
-                                    _showList = true;
-                                  })
-                                : null,
-                          ),
-                        ],
+                if (_selectedIlce != null && _filteredIlceKisileri.isNotEmpty)
+                  ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Text(
+                        "Seçili İlçedeki Eklenen Kişiler",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF1976D2)),
                       ),
                     ),
-                  ),
-                ),
-                if (!_showList)
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Colors.blue[200],
-                            size: 48,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'İl ve ilçe seçin',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Tabloyu görmek için il ve ilçe seçimi yapın ve Ara butonuna basın',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                if (_showList) ...[
-                  Padding(
+                    ..._filteredIlceKisileri.map((kisi) => ListTile(
+                          title: Text('${kisi['isim']} ${kisi['soyad']}'),
+                          subtitle: Text('${kisi['il']} / ${kisi['ilce']}'),
+                        )),
+                  ],
+                Expanded(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 20,
+                      vertical: 16,
                     ),
                     child: Card(
                       color: Colors.white,
@@ -514,197 +418,129 @@ class _SiralamaPageState extends State<SiralamaPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Yardım Yapılan Kişi Sayısı',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Color(0xFF111827),
+                            // Modern başlık satırı
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE3F2FD),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                                horizontal: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'İsim',
+                                      style: TextStyle(
+                                        color: _sort == 'Alfabe'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'En Son Yardım Tarihi',
+                                      style: TextStyle(
+                                        color: _sort == 'Tarih'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      'Son Yardım Miktarı',
+                                      style: TextStyle(
+                                        color: _sort == 'Gelir/Kişi'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              'Seçili şehir ve ilçedeki toplam yardım yapılan kişi sayısının özeti.',
-                              style: TextStyle(
-                                color: Color(0xFF6B7280),
-                                fontSize: 13,
+                            // Satırlar
+                            Expanded(
+                              child: ListView.separated(
+                                itemCount: _filteredData.length,
+                                separatorBuilder: (context, i) =>
+                                    const Divider(
+                                      height: 1,
+                                      color: Color(0xFFF0F0F0),
+                                    ),
+                                itemBuilder: (context, i) {
+                                  final item = _filteredData[i];
+                                  return Container(
+                                    color: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 8,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: Text(
+                                            item['isim'],
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Text(
+                                            item['tarih'] != null
+                                                ? '${item['tarih'].day.toString().padLeft(2, '0')}.${item['tarih'].month.toString().padLeft(2, '0')}.${item['tarih'].year}'
+                                                : '-',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Text(
+                                            item['miktar'] != null
+                                                ? '${item['miktar']} ₺'
+                                                : '-',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 15,
+                                            ),
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.group,
-                                  color: Color(0xFFFF2D55),
-                                  size: 36,
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  '${_filteredData.length}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 32,
-                                    color: Color(0xFF111827),
-                                  ),
-                                ),
-                              ],
                             ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 0,
-                    ),
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      child: Card(
-                        color: Colors.white,
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            children: [
-                              // Modern başlık satırı
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE3F2FD),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                  horizontal: 12,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        'İsim',
-                                        style: TextStyle(
-                                          color: _sort == 'Alfabe'
-                                              ? Colors.blue
-                                              : Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        'En Son Yardım Tarihi',
-                                        style: TextStyle(
-                                          color: _sort == 'Tarih'
-                                              ? Colors.blue
-                                              : Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'Son Yardım Miktarı',
-                                        style: TextStyle(
-                                          color: _sort == 'Gelir/Kişi'
-                                              ? Colors.blue
-                                              : Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
-                                        ),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              // Satırlar
-                              Expanded(
-                                child: ListView.separated(
-                                  itemCount: _filteredData.length,
-                                  separatorBuilder: (context, i) =>
-                                      const Divider(
-                                        height: 1,
-                                        color: Color(0xFFF0F0F0),
-                                      ),
-                                  itemBuilder: (context, i) {
-                                    final item = _filteredData[i];
-                                    return Container(
-                                      color: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                        horizontal: 8,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 3,
-                                            child: Text(
-                                              item['isim'],
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: Text(
-                                              '${item['tarih'].day.toString().padLeft(2, '0')}.${item['tarih'].month.toString().padLeft(2, '0')}.${item['tarih'].year}',
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 2,
-                                            child: Text(
-                                              '${item['miktar']} ₺',
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 15,
-                                              ),
-                                              textAlign: TextAlign.right,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ],
             ),
       bottomNavigationBar: BottomAppBar(
@@ -740,7 +576,9 @@ class _SiralamaPageState extends State<SiralamaPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
         onPressed: () {
-          // + butonu aksiyonu
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const YeniKisiEklePage()),
+          );
         },
         child: const Icon(Icons.add, color: Colors.white, size: 32),
         elevation: 4,
