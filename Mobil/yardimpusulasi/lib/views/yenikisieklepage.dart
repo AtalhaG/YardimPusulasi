@@ -81,10 +81,16 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
               tooltip: 'Geri Dön',
             ),
             const SizedBox(width: 4),
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: Colors.blue[50],
-              child: Icon(Icons.person, size: 28, color: Colors.blue[700]),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(Icons.favorite, color: Colors.white, size: 24),
+              ),
             ),
             const SizedBox(width: 12),
             const Text(
@@ -92,7 +98,7 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
               style: TextStyle(
                 color: Color(0xFF1976D2),
                 fontWeight: FontWeight.bold,
-                fontSize: 28,
+                fontSize: 23,
               ),
             ),
           ],
@@ -125,7 +131,7 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                         style: TextStyle(
                           color: Color(0xFF1976D2),
                           fontWeight: FontWeight.bold,
-                          fontSize: 22,
+                          fontSize: 20,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -279,20 +285,25 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                             },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.grey[700],
-                              side: BorderSide(color: Colors.grey[400]!),
+                              side: BorderSide(color: Colors.grey[400]!, width: 1.2),
                               padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                                horizontal: 28,
+                                vertical: 10,
+                                horizontal: 18,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                               ),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              elevation: 0,
                             ),
                             child: const Text("İptal"),
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
                           SizedBox(
-                            height: 48,
+                            height: 38,
                             child: ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
@@ -359,47 +370,34 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                padding: EdgeInsets.zero,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 22,
+                                ),
                                 elevation: 0,
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: const Color(0xFF1976D2),
                                 foregroundColor: Colors.white,
-                                shadowColor: Colors.transparent,
                               ),
-                              child: Ink(
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF1976D2),
-                                      Color(0xFF64B5F6),
-                                    ],
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(
+                                    Icons.save,
+                                    size: 18,
+                                    color: Colors.white,
                                   ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  height: 48,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Icon(
-                                        Icons.save,
-                                        size: 20,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        "Kaydet",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "Kaydet",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             ),
                           ),
