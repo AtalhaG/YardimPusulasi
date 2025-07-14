@@ -186,7 +186,7 @@ class _SiralamaPageState extends State<SiralamaPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
-                              color: Colors.blue[900],
+                              color: Color(0xFF1976D2), // Mavi başlık
                             ),
                           ),
                         ],
