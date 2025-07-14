@@ -80,14 +80,32 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Yardım Pusulası',
-                    style: TextStyle(
-                      color: Color(0xFF1976D2), // Mavi başlık
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.favorite, color: Colors.white, size: 24),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Yardım Pusulası',
+                        style: TextStyle(
+                          color: Color(0xFF1976D2), // Mavi başlık
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   const Text(
