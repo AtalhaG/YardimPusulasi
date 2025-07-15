@@ -67,42 +67,28 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAFAFA),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-              icon: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.black54,
-                size: 20,
-              ),
-              onPressed: () => Navigator.of(context).maybePop(),
-              tooltip: 'Geri Dön',
-            ),
-            const SizedBox(width: 4),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Icon(Icons.favorite, color: Colors.white, size: 24),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              "Yeni Kişi Ekle",
-              style: TextStyle(
-                color: Color(0xFF1976D2),
-                fontWeight: FontWeight.bold,
-                fontSize: 23,
-              ),
-            ),
-          ],
+        elevation: 2,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1976D2)),
+          onPressed: () => Navigator.pop(context),
         ),
+        title: const Text(
+          'Yeni Kişi Ekle',
+          style: TextStyle(
+            color: Color(0xFF1976D2),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.red),
+            tooltip: 'Çıkış',
+            onPressed: () {
+              // Çıkış işlemi burada yapılabilir
+            },
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -285,7 +271,10 @@ class _YeniKisiEklePageState extends State<YeniKisiEklePage> {
                             },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.grey[700],
-                              side: BorderSide(color: Colors.grey[400]!, width: 1.2),
+                              side: BorderSide(
+                                color: Colors.grey[400]!,
+                                width: 1.2,
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 vertical: 10,
                                 horizontal: 18,
