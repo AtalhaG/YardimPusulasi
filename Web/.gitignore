@@ -31,6 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
-Web/src/main/resources/yardimpusulasi-7f78f-firebase-adminsdk-fbsvc-fa45bfdbd9.json
+src/main/resources/*.json
 Web/backup_old_project/
 

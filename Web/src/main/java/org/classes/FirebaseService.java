@@ -20,46 +20,35 @@ import com.google.cloud.firestore.DocumentSnapshot;
 @Service
 public class FirebaseService {
 
-    private FirebaseAuth firebaseAuth;
-
-    public FirebaseService() {
-        // FirebaseApp'in initialize edilmesini bekle
-        try {
-            this.firebaseAuth = FirebaseAuth.getInstance();
-        } catch (Exception e) {
-            // Firebase henüz initialize edilmemiş, null olarak bırak
-            this.firebaseAuth = null;
-        }
-    }
-
     public UserRecord getUserByUid(String uid) throws FirebaseAuthException {
-        if (firebaseAuth == null) {
-            throw new RuntimeException("Firebase henüz initialize edilmemiş");
-        }
-        return firebaseAuth.getUser(uid);
+        return FirebaseAuth.getInstance().getUser(uid);
     }
 
     public String createCustomToken(String uid) throws FirebaseAuthException {
-        if (firebaseAuth == null) {
-            throw new RuntimeException("Firebase henüz initialize edilmemiş");
-        }
-        return firebaseAuth.createCustomToken(uid);
+        return FirebaseAuth.getInstance().createCustomToken(uid);
     }
 
     public boolean verifyIdToken(String idToken) {
-        if (firebaseAuth == null) {
-            return false;
-        }
         try {
-            firebaseAuth.verifyIdToken(idToken);
+            FirebaseAuth.getInstance().verifyIdToken(idToken);
+            System.out.println("Token başarıyla doğrulandı");
             return true;
         } catch (FirebaseAuthException e) {
+            System.out.println("Token doğrulama hatası: " + e.getMessage());
+            System.out.println("Hata kodu: " + e.getAuthErrorCode());
+            return false;
+        } catch (Exception e) {
+            System.out.println("Genel hata: " + e.getMessage());
             return false;
         }
     }
 
     public boolean isFirebaseInitialized() {
-        return firebaseAuth != null;
+        try {
+            return FirebaseAuth.getInstance() != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // Firestore'dan bir koleksiyondaki tüm dökümanları çek
@@ -109,5 +98,37 @@ public class FirebaseService {
             e.printStackTrace();
         }
         return ilceler;
+    }
+
+    public List<Kisi> getKisilerByIlIlce(String il, String ilce) {
+        List<Kisi> kisiler = new ArrayList<>();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            // bolgeler/{il}/{ilce} koleksiyonunu al
+            ApiFuture<QuerySnapshot> future = db.collection("bolgeler")
+                .document(il)
+                .collection(ilce)
+                .get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            for (QueryDocumentSnapshot document : documents) {
+                Kisi kisi = document.toObject(Kisi.class);
+                kisiler.add(kisi);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return kisiler;
+    }
+
+    public void addKisiToIlIlce(Kisi kisi, String il, String ilce) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            db.collection("bolgeler")
+              .document(il)
+              .collection(ilce)
+              .add(kisi);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 } 
