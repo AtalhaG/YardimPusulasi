@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Vakıf Yardım Sistemi</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<!-- Header -->
+<header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+        <div class="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
+            <i data-lucide="heart" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+            <div class="text-lg font-semibold text-gray-900">Vakıf Yardım Sistemi</div>
+            <div class="text-xs text-gray-500">Yardım Vakfı</div>
+        </div>
+    </div>
+    <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-700">Hoş geldiniz</span>
+        <span class="text-sm font-medium text-gray-900">admin</span>
+        <button class="ml-4 px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100">Çıkış</button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto mt-8 px-4">
+    <!-- Konum Filtresi -->
+    <form id="filterForm" method="post" action="/secim" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">İl</label>
+            <div class="relative">
+                <select id="ilSelect" name="sehir" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                    <option value="" disabled selected hidden>İl seçiniz</option>
+                    <!-- Thymeleaf ile iller -->
+                    <th:block th:each="il : ${bolgeler}">
+                        <option th:value="${il}" th:text="${il}"></option>
+                    </th:block>
+                </select>
+                <i data-lucide="chevron-down" class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none"></i>
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
+            <div class="relative">
+                <select id="ilceSelect" name="ilce" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                    <option value="" disabled selected hidden>İlçe seçiniz</option>
+                    <!-- İlçeler JS ile doldurulacak -->
+                </select>
+                <i data-lucide="chevron-down" class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none"></i>
+            </div>
+        </div>
+        <div class="md:col-span-2 flex justify-end mt-2">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors">Filtrele</button>
+        </div>
+    </form>
+
+    <!-- Arama ve Yeni Kişi Ekle -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+        <div class="flex-1">
+            <input type="text" placeholder="Kişi ara (ad, soyad, TC kimlik)" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+        <a href="/person/add">
+          <button type="button" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors">
+              <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+              Yeni Kişi Ekle
+          </button>
+        </a>
+    </div>
+
+    <!-- Tablo -->
+    <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center mb-2 text-gray-700 text-sm">
+            <i data-lucide="users" class="w-4 h-4 mr-1"></i>
+            1 kişi bulundu
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left">
+                <thead>
+                <tr class="bg-gray-50 border-b">
+                    <th class="px-4 py-2 font-medium text-gray-500">AD SOYAD</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">YAŞ</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">KONUM</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">TELEFON</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">AİLE</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">TOPLAM YARDIM</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">YARDIM SAYISI</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">SON YARDIM</th>
+                    <th class="px-4 py-2 font-medium text-gray-500">TARİH</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="kisi : ${kisiler}">
+                    <td class="px-4 py-2">
+                        <div class="font-semibold text-gray-900" th:text="${kisi.isim} + ' ' + ${kisi.soyad}"></div>
+                    </td>
+                    <td class="px-4 py-2 font-semibold text-gray-900" th:text="${kisi.yas}"></td>
+                    <td class="px-4 py-2">
+                        <div class="flex items-center space-x-1">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-blue-600"></i>
+                            <span class="font-medium text-gray-800" th:text="${kisi.ilce}"></span>
+                        </div>
+                        <div class="text-xs text-gray-500" th:text="${kisi.il}"></div>
+                    </td>
+                    <td class="px-4 py-2">
+                        <div class="text-gray-900" th:text="${kisi.telefon}"></div>
+                    </td>
+                    <td class="px-4 py-2 flex items-center">
+                        <i data-lucide="users" class="w-4 h-4 text-gray-400 mr-1"></i>
+                        <span th:text="${kisi.aile}"></span>
+                    </td>
+                    <td class="px-4 py-2" th:text="${kisi.gelir}"></td>
+                    <td class="px-4 py-2" th:text="${kisi.ihtiyac}"></td>
+                    <td class="px-4 py-2">
+                        <!-- Son Yardım başlığı altı boş kalacak -->
+                    </td>
+                    <td class="px-4 py-2 text-right" th:text="${#dates.format(kisi.sontarih, 'dd.MM.yyyy HH:mm')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="text-xs text-gray-500 mt-2 flex justify-between">
+            <span>Toplam 1 kişi gösteriliyor</span>
+            <span>Toplam yardım tutarı: ₺0,00</span>
+        </div>
+    </section>
+</main>
+<script>
+    lucide.createIcons();
+    document.addEventListener('DOMContentLoaded', function() {
+        var ilSelect = document.getElementById('ilSelect');
+        var ilceSelect = document.getElementById('ilceSelect');
+        if (ilSelect) {
+            ilSelect.addEventListener('change', function() {
+                var il = this.value;
+                // İl seçilince placeholder'ı kaldır
+                ilSelect.querySelector('option[value=""]').hidden = true;
+                ilceSelect.innerHTML = '<option value="" disabled selected hidden>İlçe seçiniz</option>';
+                if (!il) {
+                    ilceSelect.innerHTML = '<option value="" disabled selected hidden>İlçe seçiniz</option>';
+                    return;
+                }
+                fetch('/ilceler?bolge=' + encodeURIComponent(il))
+                    .then(response => response.json())
+                    .then(data => {
+                        ilceSelect.innerHTML = '<option value="" disabled selected hidden>İlçe seçiniz</option>';
+                        data.forEach(function(ilce) {
+                            var opt = document.createElement('option');
+                            opt.value = ilce;
+                            opt.textContent = ilce;
+                            ilceSelect.appendChild(opt);
+                        });
+                    });
+            });
+        }
+        if (ilceSelect) {
+            ilceSelect.addEventListener('change', function() {
+                // İlçe seçilince placeholder'ı kaldır
+                ilceSelect.querySelector('option[value=""]').hidden = true;
+            });
+        }
+    });
+</script>
+</body>
+</html>

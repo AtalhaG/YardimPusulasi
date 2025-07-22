@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kişi Detayları</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 9h8M8 13h6"/></svg>
+      <span class="font-semibold text-lg text-gray-800">Vakıf Yardım Sistemi</span>
+      <span class="ml-2 text-xs text-gray-400">Yardım Vakfı</span>
+    </div>
+    <div class="flex items-center space-x-4">
+      <span class="text-sm text-gray-600">Hoş geldiniz</span>
+      <span class="text-xs text-gray-500">admin</span>
+      <button class="ml-2 px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100">Çıkış</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="mb-4 flex items-center space-x-2">
+      <a href="/" class="flex items-center text-gray-500 hover:text-blue-600 text-sm font-medium">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+        Geri Dön
+      </a>
+    </div>
+    <div class="flex flex-col lg:flex-row gap-6">
+      <!-- Main Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex-1 min-w-[350px]">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <div class="bg-blue-100 text-blue-600 rounded-full p-2">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21h13a2 2 0 0 0 2-2v-2a4 4 0 0 0-4-4H7.5a4 4 0 0 0-4 4v2a2 2 0 0 0 2 2z"/></svg>
+            </div>
+            <div>
+              <div class="text-xl font-bold text-gray-900">Ali Özkan</div>
+              <div class="text-xs text-gray-500 font-medium">TC: 55667788990</div>
+            </div>
+          </div>
+          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-semibold">+ Yardım Sağla</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm mb-4">
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 12.414a8 8 0 1 0-1.414 1.414l4.243 4.243a1 1 0 0 0 1.414-1.414z"/></svg>
+            <span class="font-medium">Adres</span>:
+            <span class="text-gray-700">Alsancak Mahallesi, Kordon Caddesi No: 50<br>Konak, İzmir</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span class="font-medium">Aile Büyüklüğü</span>:
+            <span class="text-gray-700">5 kişi</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 18 0A9 9 0 0 1 3 10z"/><path d="M12 14v2m0-8v2"/></svg>
+            <span class="font-medium">Aylık Gelir</span>:
+            <span class="text-gray-700">₺4.200,00</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span class="font-medium">Yaş</span>:
+            <span class="text-gray-700">45</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2.08a2 2 0 0 1 .84-1.63l8-5.2a2 2 0 0 1 2.32 0l8 5.2a2 2 0 0 1 .84 1.63z"/></svg>
+            <span class="font-medium">Telefon</span>:
+            <span class="text-gray-700">0535 321 09 87</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="font-medium">Kayıt Tarihi</span>:
+            <span class="text-gray-700">05.03.2024</span>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center space-x-2 mb-1">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 6h8M8 10h8M8 14h8M8 18h8"/></svg>
+            <span class="font-medium">İhtiyaç Açıklaması</span>
+          </div>
+          <div class="text-sm text-gray-800 font-semibold">Çocukların okul malzemeleri ve kıyafet yardımı</div>
+        </div>
+      </div>
+      <!-- Right Side: Yardım Özeti & Geçmişi -->
+      <div class="flex flex-col gap-4 w-full lg:w-80">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="font-semibold text-gray-800 mb-2">Yardım Özeti</div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-gray-600">Toplam Yardım</span>
+            <span class="text-green-600 font-bold">₺0,00</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600">Yardım Sayısı</span>
+            <span class="text-blue-700 font-bold">0</span>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="font-semibold text-gray-800 mb-2">Yardım Geçmişi</div>
+          <div class="text-gray-500 text-sm">Henüz yardım kaydı bulunmamaktadır.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html> 
