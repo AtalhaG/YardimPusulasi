@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yardım Sağla</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <main class="max-w-xl mx-auto px-4 py-10">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <div class="flex items-center mb-6">
+        <div class="bg-green-100 text-green-600 rounded-full p-2 mr-3">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">Yardım Sağla</h2>
+          <div class="text-sm text-gray-600 font-medium">Ali Özkan</div>
+        </div>
+      </div>
+      <!-- Kişi Bilgileri -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm">
+        <div class="flex flex-col md:flex-row md:justify-between md:space-x-8">
+          <div>
+            <div><span class="text-gray-500">Adres:</span> <span class="font-medium">Konak, İzmir</span></div>
+            <div><span class="text-gray-500">Aile Büyüklüğü:</span> <span class="font-medium">5 kişi</span></div>
+            <div><span class="text-gray-500">İhtiyaç:</span> <span class="font-semibold">Çocukların okul malzemeleri ve kıyafet yardımı</span></div>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <div><span class="text-gray-500">Telefon:</span> <span class="font-medium">0535 321 09 87</span></div>
+            <div><span class="text-gray-500">Aylık Gelir:</span> <span class="font-medium">₺4.200,00</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Yardım Formu -->
+      <form class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Yardım Türü *</label>
+          <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200" required>
+            <option>Yardım türü seçin</option>
+            <option>Gıda Yardımı</option>
+            <option>Nakit Yardımı</option>
+            <option>Giyim Yardımı</option>
+            <option>Diğer</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tutar (TL) *</label>
+          <input type="number" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Açıklama *</label>
+          <textarea rows="3" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200" required placeholder="Yardımın detaylarını açıklayın..."></textarea>
+        </div>
+        <div class="bg-blue-50 rounded-lg p-4 mt-4 text-sm">
+          <div class="font-semibold text-blue-700 mb-1">Yardım Sağlayan Bilgileri</div>
+          <div class="flex flex-col md:flex-row md:space-x-8">
+            <div><span class="text-gray-600">Vakıf:</span> <span class="font-medium text-blue-900">Yardım Vakfı</span></div>
+            <div><span class="text-gray-600">Personel:</span> <span class="font-medium text-blue-900">admin</span></div>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-4">
+          <a href="/" class="px-4 py-2 border border-gray-300 rounded text-gray-700 bg-white hover:bg-gray-50">İptal</a>
+          <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+            Yardımı Kaydet
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html> 

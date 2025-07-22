@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yardım Pusulası - Giriş</title>
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div>
+        <div class="flex justify-center">
+          <div class="flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full">
+            <i data-lucide="heart" class="w-8 h-8 text-white"></i>
+          </div>
+        </div>
+        <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">
+          Yardım Pusulası
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          Yardım operasyonlarınızı takip edin ve kayıt altına alın
+        </p>
+      </div>
+      <form class="mt-8 space-y-6" method="post" action="/login">
+        <div class="rounded-md shadow-sm -space-y-px">
+          <div>
+            <input
+              type="email"
+              required
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="E-posta"
+              name="email"
+            />
+          </div>
+          <div class="relative">
+            <input
+              id="password"
+              type="password"
+              required
+              class="appearance-none rounded-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="Şifre"
+              name="password"
+            />
+            <button
+              type="button"
+              id="togglePassword"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              tabindex="-1"
+            >
+              <i id="eyeIcon" data-lucide="eye" class="h-5 w-5 text-gray-400"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <button
+            type="submit"
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            Giriş Yap
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    lucide.createIcons();
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+    togglePassword.addEventListener('click', function () {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+      eyeIcon.setAttribute('data-lucide', type === 'password' ? 'eye' : 'eye-off');
+      lucide.createIcons();
+    });
+
+    // TODO: Kendi Firebase config'iniz ile değiştirin
+    const firebaseConfig = {
+  apiKey: "AIzaSyD4Bun6RhmlwPSsEUgTcMeefYcx-U6s9oo",
+  authDomain: "yardimpusulasi-7f78f.firebaseapp.com",
+  projectId: "yardimpusulasi-7f78f",
+  storageBucket: "yardimpusulasi-7f78f.appspot.com",
+  messagingSenderId: "105286709079",
+  appId: "1:105286709079:web:6e796de3e30407f65c9812",
+  measurementId: "G-11W6QMTMFZ"
+};
+    firebase.initializeApp(firebaseConfig);
+
+    document.querySelector('form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.querySelector('input[name=email]').value;
+      const password = document.querySelector('input[name=password]').value;
+      try {
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+        const idToken = await userCredential.user.getIdToken();
+        // idToken'ı backend'e gönder
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ idToken })
+        });
+        if (response.ok) {
+          // Başarılı giriş
+          window.location.href = '/';
+        } else {
+          const data = await response.json();
+          alert('Giriş başarısız: ' + (data.message || 'Bilinmeyen hata'));
+        }
+      } catch (error) {
+        alert('Giriş başarısız: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html> 
