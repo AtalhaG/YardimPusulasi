@@ -711,12 +711,15 @@ class _SiralamaPageState extends State<SiralamaPage> {
                                                       ),
                                                     ),
                                                     const SizedBox(height: 6),
-                                                    Text(
-                                                      v['sonaciklama'] ?? '',
-                                                      style: const TextStyle(
-                                                        fontSize: 15,
-                                                        color: Color(
-                                                          0xFF374151,
+                                                    Tooltip(
+                                                      message: v['sonaciklama'] ?? '',
+                                                      child: Text(
+                                                        v['sonaciklama'] ?? '',
+                                                        style: const TextStyle(
+                                                          fontSize: 15,
+                                                          color: Color(
+                                                            0xFF374151,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
