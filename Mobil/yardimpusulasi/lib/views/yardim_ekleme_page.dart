@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class YardimEklemePage extends StatefulWidget {
   final Map<String, dynamic> kisi;
@@ -15,6 +16,8 @@ class _YardimEklemePageState extends State<YardimEklemePage> {
   final TextEditingController _aciklamaController = TextEditingController();
   
   String? _selectedYardimTuru;
+  String? _selectedNasilYapildi;
+  
   final List<String> _yardimTurleri = [
     'Yardım türü seçin',
     'Nakit Yardım',
@@ -23,6 +26,26 @@ class _YardimEklemePageState extends State<YardimEklemePage> {
     'Eğitim Yardımı',
     'Sağlık Yardımı',
     'Barınma Yardımı',
+    'Isıtma Yardımı',
+    'Ulaşım Yardımı',
+    'İş Yardımı',
+    'Ev Eşyası Yardımı',
+    'Teknoloji Yardımı',
+    'Spor Malzemesi Yardımı',
+    'Kitap Yardımı',
+    'Oyuncak Yardımı',
+    'Diğer'
+  ];
+
+  final List<String> _nasilYapildiSecenekleri = [
+    'Nasıl yapıldığını seçin',
+    'Nakit olarak teslim edildi',
+    'Banka transferi yapıldı',
+    'Eşya olarak teslim edildi',
+    'Kupon/kart verildi',
+    'Havale/EFT yapıldı',
+    'Kargo ile gönderildi',
+    'Yerinde teslim edildi',
     'Diğer'
   ];
 
@@ -90,11 +113,11 @@ class _YardimEklemePageState extends State<YardimEklemePage> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      _buildKisiBilgi('Adres:', '${widget.kisi['sehir'] ?? 'Konak'}, ${widget.kisi['ilce'] ?? 'İzmir'}'),
-                      _buildKisiBilgi('Telefon:', widget.kisi['telefon'] ?? '0535 321 09 87'),
-                      _buildKisiBilgi('Aile Büyüklüğü:', '${widget.kisi['aile_buyuklugu'] ?? '5'} kişi'),
-                      _buildKisiBilgi('Aylık Gelir:', '₺${widget.kisi['miktar'] ?? '4.200,00'}'),
-                      _buildKisiBilgi('İhtiyaç:', widget.kisi['ihtiyac'] ?? 'Çocukların okul malzemeleri ve kıyafet yardımı'),
+                      _buildKisiBilgi('Adres:', '${widget.kisi['il'] ?? 'Bilinmiyor'}, ${widget.kisi['ilce'] ?? 'Bilinmiyor'}'),
+                      _buildKisiBilgi('Telefon:', widget.kisi['telefon'] ?? 'Bilinmiyor'),
+                      _buildKisiBilgi('Aile Büyüklüğü:', '${widget.kisi['aile'] ?? 'Bilinmiyor'} kişi'),
+                      _buildKisiBilgi('Aylık Gelir:', '₺${widget.kisi['gelir'] ?? 'Bilinmiyor'}'),
+                      _buildKisiBilgi('İhtiyaç:', widget.kisi['ihtiyac'] ?? 'Bilinmiyor'),
                     ],
                   ),
                 ),
@@ -153,6 +176,53 @@ class _YardimEklemePageState extends State<YardimEklemePage> {
                         validator: (value) {
                           if (value == null || value == 'Yardım türü seçin') {
                             return 'Yardım türü seçilmelidir';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Nasıl Yapıldı
+                      const Text(
+                        'Nasıl Yapıldı *',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1976D2),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: _selectedNasilYapildi,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        ),
+                        items: _nasilYapildiSecenekleri.map((secenek) => DropdownMenuItem(
+                          value: secenek,
+                          child: Text(secenek),
+                        )).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedNasilYapildi = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value == 'Nasıl yapıldığını seçin') {
+                            return 'Nasıl yapıldığı seçilmelidir';
                           }
                           return null;
                         },
@@ -380,19 +450,96 @@ class _YardimEklemePageState extends State<YardimEklemePage> {
     );
   }
 
-  void _yardimKaydet() {
+  void _yardimKaydet() async {
     if (_formKey.currentState!.validate()) {
-      // Yardım kaydetme işlemleri burada yapılacak
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Yardım başarıyla kaydedildi!'),
-          backgroundColor: Color(0xFF1976D2),
-        ),
-      );
-      
-      // İki sayfa geri git (yardım ekleme ve kişi detay sayfalarını kapat)
-      Navigator.pop(context);
-      Navigator.pop(context);
+      try {
+        // Firebase'e yardım kaydetme
+        final yardimData = {
+          'tur': _selectedYardimTuru,
+          'tutar': double.tryParse(_tutarController.text) ?? 0.0,
+          'aciklama': _aciklamaController.text,
+          'tarih': FieldValue.serverTimestamp(),
+          'yardimSaglayan': 'Yardım Vakfı',
+          'nasilYapildi': _selectedNasilYapildi,
+        };
+
+        // Kişinin bulunduğu il ve ilçe bilgilerini al
+        final sehir = widget.kisi['il'] ?? 'İzmir';
+        final ilce = widget.kisi['ilce'] ?? 'Konak';
+        
+        // Normalize et
+        String normalize(String input) {
+          return input
+              .toLowerCase()
+              .replaceAll('ı', 'i')
+              .replaceAll('ğ', 'g')
+              .replaceAll('ü', 'u')
+              .replaceAll('ş', 's')
+              .replaceAll('ö', 'o')
+              .replaceAll('ç', 'c')
+              .replaceAll('İ', 'i');
+        }
+
+        final sehirNorm = normalize(sehir);
+        final ilceNorm = normalize(ilce);
+
+        // Kişinin doküman ID'sini bul (isim ve TC ile)
+        final kisiQuery = await FirebaseFirestore.instance
+            .collection('bolgeler')
+            .doc(sehirNorm)
+            .collection(ilceNorm)
+            .where('isim', isEqualTo: widget.kisi['isim'])
+            .where('tc', isEqualTo: widget.kisi['tc'])
+            .get();
+
+        if (kisiQuery.docs.isNotEmpty) {
+          final kisiDocId = kisiQuery.docs.first.id;
+          
+          // Yardımı subcollection'a ekle
+          await FirebaseFirestore.instance
+              .collection('bolgeler')
+              .doc(sehirNorm)
+              .collection(ilceNorm)
+              .doc(kisiDocId)
+              .collection('yardimlar')
+              .add(yardimData);
+
+          // Kişinin son yardım bilgilerini güncelle
+          await FirebaseFirestore.instance
+              .collection('bolgeler')
+              .doc(sehirNorm)
+              .collection(ilceNorm)
+              .doc(kisiDocId)
+              .update({
+                'sontarih': FieldValue.serverTimestamp(),
+                'sonaciklama': _aciklamaController.text,
+              });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Yardım başarıyla kaydedildi!'),
+              backgroundColor: Color(0xFF1976D2),
+            ),
+          );
+          
+          // Kişi detay sayfasına geri dön
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Kişi bulunamadı!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 } 
